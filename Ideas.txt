@@ -1,0 +1,7 @@
+Transform from RGB to YUV
+Have a small NLP that understand intensity "primary" "partly"
+PyTorch Image captioning
+
+RNN CNN Multilabel classification
+
+Hamming loss

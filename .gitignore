@@ -1,0 +1,11 @@
+core
+*.csv
+*.7z
+*.jpg
+*.tif
+*.h5
+*.npy
+EDA/
+kernels/
+pretrained-models/
+tmp/
