@@ -1,5 +1,9 @@
 from torch.autograd import Variable
 import numpy as np
+import time
+import shutil
+import torch
+import os
 
 def train(epoch,train_loader,model,loss_func, optimizer):
     model.train()
@@ -12,7 +16,7 @@ def train(epoch,train_loader,model,loss_func, optimizer):
         loss.backward()
         optimizer.step()
         if batch_idx % 10 == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            print('Train Epoch: {:03d} [{:05d}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader) * len(data),
                 100. * batch_idx / len(train_loader), loss.data[0]))
 
@@ -41,4 +45,14 @@ def validate(epoch,valid_loader,model,loss_func, score_func):
     true_target = np.vstack(true_target)
    
     score = score_func(true_target, predictions)
-    print("===> Avg. loss: {:.4f}\tScore: {:.4f}".format(avg_loss,score))
+    print("===> Validation - Avg. loss: {:.4f}\tScore: {:.4f}".format(avg_loss,score))
+    return score, avg_loss
+    
+def snapshot(dir_path, is_best, state):
+    snapshot_file = os.path.join(dir_path,
+                    time.strftime("%Y-%m-%d_%H%M-") +
+                    'snapshot-epoch_{:04d}_best_score_{:.4f}.pth'.format(state['epoch']-1, state['best_score']))
+    torch.save(state, snapshot_file)
+    print("Snapshot saved to {}".format(snapshot_file))
+    if is_best:
+        shutil.copyfile(snapshot_file, os.path.join(dir_path,'model_best.pth'))

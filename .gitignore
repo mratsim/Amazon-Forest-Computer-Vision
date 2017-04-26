@@ -11,3 +11,4 @@ pretrained-models/
 tmp/
 .ipynb_checkpoints/
 __pycache__/
+snapshots/

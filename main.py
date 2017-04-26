@@ -1,6 +1,6 @@
 from src.dataload import KaggleAmazonDataset
 from src.neuralnet import Net
-from src.training import train, validate
+from src.training import train, validate, snapshot
 from src.model_selection import train_valid_split
 # from src.model_selection import train_valid_split
 import torch.optim as optim
@@ -13,6 +13,7 @@ from sklearn.metrics import fbeta_score
 import numpy as np
 import torch
 import random
+from timeit import default_timer as timer
 
 MODEL = Net().cuda()
 OPTIMIZER = optim.SGD(MODEL.parameters(), lr=0.01, momentum=0.5)
@@ -21,10 +22,17 @@ OPTIMIZER = optim.SGD(MODEL.parameters(), lr=0.01, momentum=0.5)
 LOSS_FUNC = F.binary_cross_entropy
 LABEL_THRESHOLD = 0.2
 
+SAVE_DIR = './snapshots'
+
 def f2_score(y_true, y_pred):
     return fbeta_score(y_true, y_pred > LABEL_THRESHOLD, beta=2, average='samples')
 
 if __name__ == "__main__":
+    # Initiate timer
+    global_timer = timer()
+    
+    
+    
     # Setting random seeds for reproducibility. (Caveat, some CuDNN algorithms are non-deterministic)
     torch.manual_seed(1337)
     torch.cuda.manual_seed(1337)
@@ -55,6 +63,27 @@ if __name__ == "__main__":
                           pin_memory=True)
     
     # Start training
-    for epoch in range(1, 6):
+    best_score = 0.
+    for epoch in range(1, 100):
+        epoch_timer = timer()
+        
+        # Train and validate
         train(epoch, train_loader, MODEL, LOSS_FUNC, OPTIMIZER)
-        validate(epoch, valid_loader, MODEL, LOSS_FUNC, f2_score)
+        score, loss = validate(epoch, valid_loader, MODEL, LOSS_FUNC, f2_score)
+        # Save
+        is_best = score > best_score
+        best_score = max(score, best_score)
+        snapshot(SAVE_DIR, is_best,{
+            'epoch': epoch + 1,
+            'state_dict': MODEL.state_dict(),
+            'best_score': best_score,
+            'optimizer': OPTIMIZER.state_dict()
+        })
+        
+        end_epoch_timer = timer()
+        print("#### End epoch {}, elapsed time: {}".format(epoch, end_epoch_timer - epoch_timer))
+        
+        
+    end_global_timer = timer()
+    print("################## Success #########################")
+    print("Total elapsed time: %s" % (end_time - start_time))
