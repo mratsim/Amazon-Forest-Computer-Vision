@@ -9,3 +9,5 @@ EDA/
 kernels/
 pretrained-models/
 tmp/
+.ipynb_checkpoints/
+__pycache__/
