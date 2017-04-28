@@ -28,20 +28,23 @@ class KaggleAmazonDataset(Dataset):
         self.img_ext = img_ext
         self.transform = transform
 
-        self.X_train = tmp_df['image_name']
-        self.y_train = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
+        self.X = tmp_df['image_name']
+        self.y = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
 
     def __getitem__(self, index):
-        img = Image.open(self.img_path + self.X_train[index] + self.img_ext)
+        img = Image.open(self.img_path + self.X[index] + self.img_ext)
         img = img.convert('RGB')
         if self.transform is not None:
             img = self.transform(img)
         
-        label = from_numpy(self.y_train[index])
+        label = from_numpy(self.y[index])
         return img, label
 
     def __len__(self):
-        return len(self.X_train.index)
+        return len(self.X.index)
+    
+    def getLabelEncoder(self):
+        return self.mlb
 
 class AugmentedAmazonDataset(Dataset):
     """Dataset wrapping images and target labels for Kaggle - Planet Amazon from Space competition.
@@ -64,15 +67,15 @@ class AugmentedAmazonDataset(Dataset):
         self.img_ext = img_ext
         self.transform = transform
 
-        self.X_train = tmp_df['image_name']
-        self.y_train = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
+        self.X = tmp_df['image_name']
+        self.y = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
         self.augmentNumber = 14 # TODO, do something about this harcoded value
 
     def __getitem__(self, index):
         real_length = self.real_length()
         real_index = index % real_length
         
-        img = Image.open(self.img_path + self.X_train[real_index] + self.img_ext)
+        img = Image.open(self.img_path + self.X[real_index] + self.img_ext)
         img = img.convert('RGB')
         
         ## Augmentation code
@@ -118,11 +121,14 @@ class AugmentedAmazonDataset(Dataset):
         if self.transform is not None:
             img = self.transform(img)
         
-        label = from_numpy(self.y_train[real_index])
+        label = from_numpy(self.y[real_index])
         return img, label
     
     def __len__(self):
-        return len(self.X_train.index) * self.augmentNumber
+        return len(self.X.index) * self.augmentNumber
     
     def real_length(self):
-        return len(self.X_train.index)
+        return len(self.X.index)
+    
+    def getLabelEncoder(self):
+        return self.mlb
