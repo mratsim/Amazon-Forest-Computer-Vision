@@ -26,6 +26,12 @@ def train_valid_split(dataset, test_size = 0.25, shuffle = False, random_seed = 
         raise ValueError('%s should be an int or a float' % str)
     return indices[split:], indices[:split]
 
+##################################################
+## DEPRECATED: AugmentedAmazonDataset is deprecated
+## https://discuss.pytorch.org/t/feedback-on-pytorch-for-kaggle-competitions/2252/8?u=mratsim
+## Augmentation on PyTorch are done randomly at each epoch
+
+
 def augmented_train_valid_split(dataset, test_size = 0.25, shuffle = False, random_seed = 0):
     """ Return a list of splitted indices from a DataSet.
     Indices can be used with DataLoader to build a train and validation set.
