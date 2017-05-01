@@ -1,14 +1,10 @@
-Transform from RGB to YUV
-(Note YUV will allow easy data augmentation on luminance, but it's harder to detect green and blue)
-
 Have a small NLP that understand intensity "primary" "partly"
 PyTorch Image captioning
 
 RNN CNN Multilabel classification
 
-Hamming loss
-
-
 # Data source:
 https://github.com/CreativeInquiry/terrapattern
 https://github.com/nealjean/predicting-poverty
+
+DO something about threshold optimization (i.e. remove it)

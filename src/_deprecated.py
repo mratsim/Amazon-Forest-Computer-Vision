@@ -111,6 +111,21 @@ def f2_score_mean(pred_labels, true_labels):
     return acc / i
 
 
+### Kaggle kernel search
+def search_best_threshold(p_valid, y_valid, try_all=False, verbose=False):
+    p_valid, y_valid = np.array(p_valid), np.array(y_valid)
+
+    best_threshold = 0
+    best_score = -1
+    totry = np.arange(0,1,0.005) if try_all is False else np.unique(p_valid)
+    for t in totry:
+        score = fbeta_score(y_valid, p_valid > t, beta=2, average='samples')
+        if score > best_score:
+            best_score = score
+            best_threshold = t
+    logger.info("===> Optimal threshold for each label:\n{}".format(best_threshold))
+    return best_score, best_threshold
+
 
 
 ## From dataload.py
@@ -222,3 +237,35 @@ class AugmentedAmazonDataset(Dataset):
     # train_sampler = SubsetRandomSampler(augmented_train_idx)
     # valid_sampler = SubsetRandomSampler(valid_idx)
     ###########################################################
+    
+    
+##################################################
+## DEPRECATED: AugmentedAmazonDataset is deprecated
+## https://discuss.pytorch.org/t/feedback-on-pytorch-for-kaggle-competitions/2252/8?u=mratsim
+## Augmentation on PyTorch are done randomly at each epoch
+
+
+def augmented_train_valid_split(dataset, test_size = 0.25, shuffle = False, random_seed = 0):
+    """ Return a list of splitted indices from a DataSet.
+    Indices can be used with DataLoader to build a train and validation set.
+    
+    Arguments:
+        A Dataset
+        A test_size, as a float between 0 and 1 (percentage split) or as an int (fixed number split)
+        Shuffling True or False
+        Random seed
+    """
+    length = dataset.real_length()
+    indices = list(range(1,length))
+    
+    if shuffle == True:
+        random.seed(random_seed)
+        random.shuffle(indices)
+    
+    if type(test_size) is float:
+        split = floor(test_size * length)
+    elif type(test_size) is int:
+        split = test_size
+    else:
+        raise ValueError('%s should be an int or a float' % str)
+    return indices[split:], indices[:split]
