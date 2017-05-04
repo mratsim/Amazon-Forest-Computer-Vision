@@ -7,6 +7,7 @@ from src.p_model_selection import train_valid_split
 from src.p_logger import setup_logs
 from src.p_prediction import predict, output
 from src.p_data_augmentation import ColorJitter
+from src.p_metrics import SmoothF2Loss
 
 ## Utilities
 import random
@@ -38,11 +39,11 @@ from torchsample.transforms import Affine
 # model = ResNet101(17).cuda()
 model = DenseNet121(17).cuda()
 
-epochs = 22
+epochs = 30
 batch_size = 16
 
 # Run name
-run_name = time.strftime("%Y-%m-%d_%H%M-") + "densenet121"
+run_name = time.strftime("%Y-%m-%d_%H%M-") + "thresh_densenet121"
 
 ## Normalization on dataset mean/std
 # normalize = transforms.Normalize(mean=[0.30249774, 0.34421161, 0.31507745],
@@ -55,10 +56,10 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
 # Note, p_training has lr_decay automated
 # optimizer = optim.Adam(model.parameters(), lr=0.1) # From scratch # Don't use Weight Decay with PReLU
 # optimizer = optim.SGD(model.parameters(), lr=1e-1, momentum=0.9, weight_decay=1e-4)  # From scratch
-optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9) # Finetuning whole model
-# optimizer = optim.SGD(model.classifier.parameters(), lr=1e-2, momentum=0.9) # Finetuning classifier
+optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9, weight_decay=1e-4) # Finetuning whole model
 
 criterion = torch.nn.MultiLabelSoftMarginLoss()
+# criterion = SmoothF2Loss() # Using F2 directly as a cost function does 0.88 as a final cross validation. This is probably explained because cross-enropy is very efficient for sigmoid outputs (turning it into a convex problem). So keep Sigmoid + Cross entropy or something else + SmoothF2
 
 save_dir = './snapshots'
 
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     
     ## Normalization only for validation and test
     ds_transform_raw = transforms.Compose([
-                     transforms.CenterCrop(224),
+                     transforms.Scale(224),
                      transforms.ToTensor(),
                      normalize
                      ])
@@ -178,12 +179,12 @@ if __name__ == "__main__":
     predictions = predict(test_loader, model) # TODO load model from the best on disk
     
     output(predictions,
-           threshold,
+           checkpoint['threshold'],
            X_test,
            X_train.getLabelEncoder(),
            './out',
            run_name,
-           score) # TODO early_stopping and use best_score
+           checkpoint['best_score']) # TODO early_stopping and use best_score
     
     ##########################################################
     

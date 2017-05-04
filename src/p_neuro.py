@@ -165,7 +165,11 @@ class DenseNet121(nn.Module):
         nn.Linear(num_feats, num_classes)
         )
 
-        # Freeze those weights
+        # Init of last layer
+        for m in self.classifier:
+            kaiming_normal(m.weight)
+            
+        # Freeze weights
         # for p in self.features.parameters():
         #     p.requires_grad = False
 

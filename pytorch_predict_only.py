@@ -1,6 +1,6 @@
 ## Custom Imports
 from src.p_dataload import KaggleAmazonDataset
-from src.p_neuro import Net, ResNet50
+from src.p_neuro import Net, ResNet50, DenseNet121
 from src.p_training import train, snapshot
 from src.p_validation import validate
 from src.p_model_selection import train_valid_split
@@ -29,16 +29,12 @@ import torch
 
 ############################################################################
 #######  CONTROL CENTER ############# STAR COMMAND #########################
-## Variables setup
-model = ResNet50(17).cuda()
-# model = Net().cuda()
-# model = WideResNet(16, 17, 4, 0.3)
-
-epochs = 22
-batch_size = 16
 
 # Run name
-run_name = time.strftime("%Y-%m-%d_%H%M-") + "resnet50-pycaffe"
+run_name = "2017-05-03_1747-thresh_densenet121-predict-only"
+
+model = DenseNet121(17).cuda()
+batch_size = 32
 
 ## Normalization on dataset mean/std
 # normalize = transforms.Normalize(mean=[0.30249774, 0.34421161, 0.31507745],
@@ -47,14 +43,6 @@ run_name = time.strftime("%Y-%m-%d_%H%M-") + "resnet50-pycaffe"
 ## Normalization on ImageNet mean/std for finetuning
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-
-# Note, p_training has lr_decay automated
-# optimizer = optim.Adam(model.parameters(), lr=0.1) # From scratch # Don't use Weight Decay with PReLU
-# optimizer = optim.SGD(model.parameters(), lr=1e-1, momentum=0.9, weight_decay=1e-4)  # From scratch
-optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9) # Finetuning whole model
-# optimizer = optim.SGD(model.classifier.parameters(), lr=1e-2, momentum=0.9) # Finetuning classifier
-
-criterion = torch.nn.MultiLabelSoftMarginLoss()
 
 save_dir = './snapshots'
 
@@ -81,6 +69,7 @@ if __name__ == "__main__":
                      normalize
                      ])
     
+
     
     X_test = KaggleAmazonDataset('./data/sample_submission.csv','./data/test-jpg/','.jpg',
                                   ds_transform_raw
@@ -91,7 +80,7 @@ if __name__ == "__main__":
                               pin_memory=True)
     
     # Load model from best iteration
-    model_path = './snapshots/2017-05-01_1923-resnet50-pycaffe-model_best.pth'
+    model_path = './snapshots/2017-05-03_1747-thresh_densenet121-model_best.pth'
     logger.info('===> loading {} for prediction'.format(model_path))
     checkpoint = torch.load(model_path)
     model.load_state_dict(checkpoint['state_dict'])
@@ -108,7 +97,7 @@ if __name__ == "__main__":
            X_test,
            X_train.getLabelEncoder(),
            './out',
-           '2017-05-01_1923-resnet50-pycaffe',
+           '2017-05-03_1747-thresh_densenet121',
            checkpoint['best_score']) # TODO early_stopping and use best_score
     
     ##########################################################

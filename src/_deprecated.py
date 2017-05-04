@@ -126,7 +126,10 @@ def search_best_threshold(p_valid, y_valid, try_all=False, verbose=False):
     logger.info("===> Optimal threshold for each label:\n{}".format(best_threshold))
     return best_score, best_threshold
 
-
+# Search with L-BFGS-B
+    thr_0 = np.array([0.20 for i in range(17)])
+    constraints = [(0.,1.) for i in range(17)]
+thr_opt, score_neg, dico = fmin_l_bfgs_b(f_neg, thr_0, bounds=constraints, approx_grad=True, epsilon=0.05)
 
 ## From dataload.py
 ##################################################

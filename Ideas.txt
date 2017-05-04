@@ -1,10 +1,78 @@
-Have a small NLP that understand intensity "primary" "partly"
-PyTorch Image captioning
-
-RNN CNN Multilabel classification
-
-# Data source:
+## Data sources:
 https://github.com/CreativeInquiry/terrapattern
 https://github.com/nealjean/predicting-poverty
 
-DO something about threshold optimization (i.e. remove it)
+## Weather
+https://www.kaggle.com/c/planet-understanding-the-amazon-from-space/data
+Each chip will have one and potentially more than one atmospheric label and zero or more common and rare labels. Chips that are labeled as cloudy should have no other labels, but there may be labeling errors.
+
+Cloud Cover Labels
+
+Clouds are a major challenge for passive satellite imaging, and daily cloud cover and rain showers in the Amazon basin can significantly complicate monitoring in the area. For this reason we have chosen to include a cloud cover label for each chip. These labels closely mirror what one would see in a local weather forecast: clear, partly cloudy, cloudy, and haze. For our purposes haze is defined as any chip where atmospheric clouds are visible but they are not so opaque as to obscure the ground. Clear scenes show no evidence of clouds, and partly cloudy scenes can show opaque cloud cover over any portion of the image. Cloudy images have 90% of the chip obscured by opaque cloud cover.
+
+=> Probably you can't be clear and cloudy and partly cloudy at the same time
+==> Separate the output in a softmax + Sigmoid activation?
+==> Use RNN to compute the dependency?
+==> Use Canonical correlated Auto-encoder?
+
+## Deal with Imbalance:
+
+- Resampling: Oversampling/undersampling - changing probability of drawing from underrepresented/overrepresented classes.
+Over-sampling can introduce undesirable noise with overfitting risks,
+and under-sampling is often but may remove valuable information.
+
+To combine SubsetRandomSampler and WeightedRandomSampler, use WeightedRandomSampler with weight 0 for validation indices
+
+- Synthesize new examples from underrepresented class
+
+
+- Penalization: change cost so that NN pays more attention to underrepresented classes
+
+
+## Loss function:
+- Which loss function for multilabel instead of BCE?
+- WARP loss?
+
+
+## Thresholding
+- Remove thresholding all together with an end to end learner
+
+## Architecture
+Have a RNN that understand intensity/correlation "partly"
+
+
+- PyTorch Image captioning (Neural Talk)
+- RNN+CNN Multilabel classification
+
+## Forum:
+- CNN-RNN implementation
+https://github.com/fchollet/keras/issues/5146
+
+## Papers:
+- DL - Imbalanced dataset - kNN cluster + Quintuplet hinge loss
+https://pdfs.semanticscholar.org/69a6/8f9cf874c69e2232f47808016c2736b90c35.pdf
+
+- Multilabel ranking
+https://arxiv.org/abs/1312.4894
+
+- Multilabel classification for fashion search
+https://openreview.net/pdf?id=HyWDCXjgx
+
+- CNN+RNN Unified Arch for multilabel
+https://www.ics.uci.edu/~yyang8/research/cnn-rnn/cnn-rnn-cvpr2016.pdf
+
+- Deep Latent space
+http://mml.citi.sinica.edu.tw/papers/AAAI_2017.pdf
+
+# Overviews:
+- RNN + CNN combo
+https://wiki.tum.de/display/lfdv/Recurrent+Neural+Networks+-+Combination+of+RNN+and+CNN
+
+# Done
+===> Optimize threshold with L-BFGS-B
+===> search global minimum with basinhoping ?
+
+
+# Done and not used
+===> Tried using a smooth F2 based loss function (no threshold), the network performance on F2 score was reduced by 0.03 from the start to finish (0.85 --> 0.88)
+===> Apparently cross-entropy have very nice properties when used together with sigmoid function and F2 score does not have those.
