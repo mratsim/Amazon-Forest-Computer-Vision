@@ -7,7 +7,8 @@ from src.p_model_selection import train_valid_split
 from src.p_logger import setup_logs
 from src.p_prediction import predict, output
 from src.p_data_augmentation import ColorJitter
-from src.p_metrics import SmoothF2Loss
+# from src.p_metrics import SmoothF2Loss
+from src.p_sampler import SubsetSampler, balance_weights
 
 ## Utilities
 import random
@@ -25,10 +26,9 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import transforms
 from torch.utils.data import DataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
 import torch
 from torchsample.transforms import Affine
-
+from torch.utils.data.sampler import WeightedRandomSampler, SubsetRandomSampler
 
 ############################################################################
 #######  CONTROL CENTER ############# STAR COMMAND #########################
@@ -43,7 +43,7 @@ epochs = 30
 batch_size = 16
 
 # Run name
-run_name = time.strftime("%Y-%m-%d_%H%M-") + "thresh_densenet121"
+run_name = time.strftime("%Y-%m-%d_%H%M-") + "noweight"
 
 ## Normalization on dataset mean/std
 # normalize = transforms.Normalize(mean=[0.30249774, 0.34421161, 0.31507745],
@@ -56,7 +56,7 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
 # Note, p_training has lr_decay automated
 # optimizer = optim.Adam(model.parameters(), lr=0.1) # From scratch # Don't use Weight Decay with PReLU
 # optimizer = optim.SGD(model.parameters(), lr=1e-1, momentum=0.9, weight_decay=1e-4)  # From scratch
-optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9, weight_decay=1e-4) # Finetuning whole model
+optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9) # Finetuning whole model
 
 criterion = torch.nn.MultiLabelSoftMarginLoss()
 # criterion = SmoothF2Loss() # Using F2 directly as a cost function does 0.88 as a final cross validation. This is probably explained because cross-enropy is very efficient for sigmoid outputs (turning it into a convex problem). So keep Sigmoid + Cross entropy or something else + SmoothF2
@@ -88,13 +88,13 @@ if __name__ == "__main__":
                      transforms.RandomHorizontalFlip(),
                      transforms.ToTensor(),
                      ColorJitter(),
-                     normalize,
-                     #Affine(
-                     #    rotation_range = 15,
-                     #    translation_range = (0.2,0.2),
-                     #    shear_range = math.pi/6,
-                     #    zoom_range=(0.7,1.4)
-    #                 )
+                     normalize
+                     # Affine(
+                     #     rotation_range = 15,
+                     #     translation_range = (0.2,0.2),
+                     #     shear_range = math.pi/6,
+                     #     zoom_range=(0.7,1.4)
+                     # )
     ])
     
     ## Normalization only for validation and test
@@ -112,11 +112,19 @@ if __name__ == "__main__":
     X_val = KaggleAmazonDataset('./data/train.csv','./data/train-jpg/','.jpg',
                                  ds_transform_raw
                                  )
+    
+    # Resample the dataset
+    # weights = balance_weights(X_train.getDF(), 'tags', X_train.getLabelEncoder())
+    # weights = np.clip(weights,0.02,0.2) # We need to let the net view the most common classes or learning is too slow
+
     # Creating a validation split
     train_idx, valid_idx = train_valid_split(X_train, 0.2)
     
+    # weights[valid_idx] = 0
+    
+    # train_sampler = WeightedRandomSampler(weights, len(train_idx))
     train_sampler = SubsetRandomSampler(train_idx)
-    valid_sampler = SubsetRandomSampler(valid_idx)
+    valid_sampler = SubsetSampler(valid_idx)
     
     ######    ##########    ##########    ########    #########
     
@@ -141,7 +149,7 @@ if __name__ == "__main__":
         
         # Train and validate
         train(epoch, train_loader, model, criterion, optimizer)
-        score, loss, threshold = validate(epoch, valid_loader, model, criterion)
+        score, loss, threshold = validate(epoch, valid_loader, model, criterion, X_train.getLabelEncoder())
         # Save
         is_best = score > best_score
         best_score = max(score, best_score)

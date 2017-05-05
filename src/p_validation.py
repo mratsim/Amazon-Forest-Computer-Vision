@@ -2,6 +2,7 @@ from torch.autograd import Variable
 import numpy as np
 import logging
 import torch.nn.functional as F
+from tqdm import tqdm
 
 from src.p_metrics import best_f2_score
 
@@ -10,7 +11,7 @@ logger = logging.getLogger("Planet-Amazon")
 
 ##################################################
 #### Validate function
-def validate(epoch,valid_loader,model,loss_func):
+def validate(epoch,valid_loader,model,loss_func,mlb):
     ## Volatile variables do not save intermediate results and build graphs for backprop, achieving massive memory savings.
     
     model.eval()
@@ -18,7 +19,8 @@ def validate(epoch,valid_loader,model,loss_func):
     predictions = []
     true_labels = []
     
-    for batch_idx, (data, target) in enumerate(valid_loader):
+    logger.info("Starting Validation")
+    for batch_idx, (data, target) in enumerate(tqdm(valid_loader)):
         true_labels.append(target.cpu().numpy())
         
         data, target = data.cuda(async=True), target.cuda(async=True)
@@ -35,6 +37,7 @@ def validate(epoch,valid_loader,model,loss_func):
     true_labels = np.vstack(true_labels)
    
     score, threshold = best_f2_score(true_labels, predictions)
+    logger.info("Corresponding tags\n{}".format(mlb.classes_))
     
     logger.info("===> Validation - Avg. loss: {:.4f}\tF2 Score: {:.4f}".format(avg_loss,score))
     return score, avg_loss, threshold

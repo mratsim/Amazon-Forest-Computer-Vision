@@ -13,18 +13,8 @@ Clouds are a major challenge for passive satellite imaging, and daily cloud cove
 => Probably you can't be clear and cloudy and partly cloudy at the same time
 ==> Separate the output in a softmax + Sigmoid activation?
 ==> Use RNN to compute the dependency?
-==> Use Canonical correlated Auto-encoder?
 
 ## Deal with Imbalance:
-
-- Resampling: Oversampling/undersampling - changing probability of drawing from underrepresented/overrepresented classes.
-Over-sampling can introduce undesirable noise with overfitting risks,
-and under-sampling is often but may remove valuable information.
-
-To combine SubsetRandomSampler and WeightedRandomSampler, use WeightedRandomSampler with weight 0 for validation indices
-
-- Synthesize new examples from underrepresented class
-
 
 - Penalization: change cost so that NN pays more attention to underrepresented classes
 
@@ -61,9 +51,6 @@ https://openreview.net/pdf?id=HyWDCXjgx
 - CNN+RNN Unified Arch for multilabel
 https://www.ics.uci.edu/~yyang8/research/cnn-rnn/cnn-rnn-cvpr2016.pdf
 
-- Deep Latent space
-http://mml.citi.sinica.edu.tw/papers/AAAI_2017.pdf
-
 # Overviews:
 - RNN + CNN combo
 https://wiki.tum.de/display/lfdv/Recurrent+Neural+Networks+-+Combination+of+RNN+and+CNN
@@ -71,7 +58,8 @@ https://wiki.tum.de/display/lfdv/Recurrent+Neural+Networks+-+Combination+of+RNN+
 # Done
 ===> Optimize threshold with L-BFGS-B
 ===> search global minimum with basinhoping ?
-
+===> Resampling to deal with imbalance
+===> Data augmentation with color and affine transforms
 
 # Done and not used
 ===> Tried using a smooth F2 based loss function (no threshold), the network performance on F2 score was reduced by 0.03 from the start to finish (0.85 --> 0.88)

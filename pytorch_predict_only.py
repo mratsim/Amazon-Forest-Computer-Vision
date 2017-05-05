@@ -31,7 +31,7 @@ import torch
 #######  CONTROL CENTER ############# STAR COMMAND #########################
 
 # Run name
-run_name = "2017-05-03_1747-thresh_densenet121-predict-only"
+run_name = "2017-05-04_1730-thresh_densenet121-predict-only"
 
 model = DenseNet121(17).cuda()
 batch_size = 32
@@ -80,7 +80,7 @@ if __name__ == "__main__":
                               pin_memory=True)
     
     # Load model from best iteration
-    model_path = './snapshots/2017-05-03_1747-thresh_densenet121-model_best.pth'
+    model_path = './snapshots/2017-05-04_1730-thresh_densenet121-model_best.pth'
     logger.info('===> loading {} for prediction'.format(model_path))
     checkpoint = torch.load(model_path)
     model.load_state_dict(checkpoint['state_dict'])
@@ -97,8 +97,8 @@ if __name__ == "__main__":
            X_test,
            X_train.getLabelEncoder(),
            './out',
-           '2017-05-03_1747-thresh_densenet121',
-           checkpoint['best_score']) # TODO early_stopping and use best_score
+           '2017-05-04_1730-thresh_densenet121',
+           checkpoint['best_score'])
     
     ##########################################################
     

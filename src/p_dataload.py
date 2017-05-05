@@ -19,8 +19,8 @@ class KaggleAmazonDataset(Dataset):
 
     def __init__(self, csv_path, img_path, img_ext, transform=None):
     
-        tmp_df = pd.read_csv(csv_path)
-        assert tmp_df['image_name'].apply(lambda x: os.path.isfile(img_path + x + img_ext)).all(), \
+        self.df = pd.read_csv(csv_path)
+        assert self.df['image_name'].apply(lambda x: os.path.isfile(img_path + x + img_ext)).all(), \
 "Some images referenced in the CSV file were not found"
         
         self.mlb = MultiLabelBinarizer()
@@ -28,9 +28,12 @@ class KaggleAmazonDataset(Dataset):
         self.img_ext = img_ext
         self.transform = transform
 
-        self.X = tmp_df['image_name']
-        self.y = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
+        self.X = self.df['image_name']
+        self.y = self.mlb.fit_transform(self.df['tags'].str.split()).astype(np.float32)
 
+    def X(self):
+        return self.X
+        
     def __getitem__(self, index):
         img = Image.open(self.img_path + self.X[index] + self.img_ext)
         img = img.convert('RGB')
@@ -41,7 +44,10 @@ class KaggleAmazonDataset(Dataset):
         return img, label
 
     def __len__(self):
-        return len(self.X.index)
+        return len(self.df.index)
     
     def getLabelEncoder(self):
         return self.mlb
+    
+    def getDF(self):
+        return self.df

@@ -4,6 +4,7 @@ import logging
 import os
 import pandas as pd
 import torch.nn.functional as F
+from tqdm import tqdm
 
 ## Get the same logger from main"
 logger = logging.getLogger("Planet-Amazon")
@@ -14,7 +15,8 @@ def predict(test_loader, model):
     model.eval()
     predictions = []
     
-    for batch_idx, (data, _) in enumerate(test_loader):
+    logger.info("Starting Prediction")
+    for batch_idx, (data, _) in enumerate(tqdm(test_loader)):
         data = data.cuda(async=True)
         data = Variable(data, volatile=True)
     
