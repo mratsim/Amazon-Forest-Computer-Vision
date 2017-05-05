@@ -58,8 +58,8 @@ https://wiki.tum.de/display/lfdv/Recurrent+Neural+Networks+-+Combination+of+RNN+
 # Done
 ===> Optimize threshold with L-BFGS-B
 ===> search global minimum with basinhoping ?
-===> Resampling to deal with imbalance
-===> Data augmentation with color and affine transforms
+===> Resampling to deal with imbalance - To be done with care, thresholds became 0 and 1 for certain classes
+===> Data augmentation with color and affine transforms - Zoom might have adverse effect
 
 # Done and not used
 ===> Tried using a smooth F2 based loss function (no threshold), the network performance on F2 score was reduced by 0.03 from the start to finish (0.85 --> 0.88)

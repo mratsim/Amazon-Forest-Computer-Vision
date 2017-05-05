@@ -96,7 +96,7 @@ class ResNet101(nn.Module):
         super(ResNet101, self).__init__()
         
         # Loading ResNet arch from PyTorch and weights from Pycaffe
-        original_model = models.resnet50(pretrained=False)
+        original_model = models.resnet101(pretrained=False)
         original_model.load_state_dict(torch.load('./zoo/resnet101.pth'))
         
         # Everything except the last linear layer
@@ -152,7 +152,7 @@ class DenseNet121(nn.Module):
     def __init__(self, num_classes):
         super(DenseNet121, self).__init__()
         
-        original_model = models.resnet50(pretrained=True)
+        original_model = models.densenet121(pretrained=True)
         
         # Everything except the last linear layer
         self.features = nn.Sequential(*list(original_model.children())[:-1])
