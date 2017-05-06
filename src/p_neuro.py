@@ -4,6 +4,8 @@ from torchvision import models
 from torch.nn.init import kaiming_normal
 from torch import np
 import torch
+import torch.nn.functional as F
+
 
 ## Custom baseline
 class Net(nn.Module):    
@@ -119,7 +121,36 @@ class ResNet101(nn.Module):
         f = f.view(f.size(0), -1)
         y = self.classifier(f)
         return y
-    
+
+class ResNet152(nn.Module):
+    ## We use ResNet weights from PyCaffe.
+    def __init__(self, num_classes):
+        super(ResNet152, self).__init__()
+        
+        # Loading ResNet arch from PyTorch and weights from Pycaffe
+        original_model = models.resnet152(pretrained=False)
+        original_model.load_state_dict(torch.load('./zoo/resnet152.pth'))
+        
+        # Everything except the last linear layer
+        self.features = nn.Sequential(*list(original_model.children())[:-1])
+        
+        # Get number of features of last layer
+        num_feats = original_model.fc.in_features
+        
+        # Plug our classifier
+        self.classifier = nn.Sequential(
+        nn.Linear(num_feats, num_classes)
+        )
+
+        # Freeze those weights
+        # for p in self.features.parameters():
+        #     p.requires_grad = False
+
+    def forward(self, x):
+        f = self.features(x)
+        f = f.view(f.size(0), -1)
+        y = self.classifier(f)
+        return y
     
 ## VGG fine-tuning
 class VGG16(nn.Module):
@@ -148,7 +179,6 @@ class VGG16(nn.Module):
             return y
 
 class DenseNet121(nn.Module):
-    ## We use ResNet weights from PyCaffe.
     def __init__(self, num_classes):
         super(DenseNet121, self).__init__()
         
@@ -158,7 +188,7 @@ class DenseNet121(nn.Module):
         self.features = nn.Sequential(*list(original_model.children())[:-1])
         
         # Get number of features of last layer
-        num_feats = original_model.fc.in_features
+        num_feats = original_model.classifier.in_features
         
         # Plug our classifier
         self.classifier = nn.Sequential(
@@ -175,6 +205,7 @@ class DenseNet121(nn.Module):
 
     def forward(self, x):
         f = self.features(x)
-        f = f.view(f.size(0), -1)
-        y = self.classifier(f)
-        return y
+        out = F.relu(f, inplace=True)
+        out = F.avg_pool2d(out, kernel_size=7).view(f.size(0), -1)
+        out = self.classifier(out)
+        return out

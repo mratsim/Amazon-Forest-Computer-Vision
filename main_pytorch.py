@@ -1,13 +1,16 @@
 ## Custom Imports
-from src.p_dataload import KaggleAmazonDataset
-from src.p_neuro import Net, ResNet50, ResNet101, DenseNet121
+from src.p2_dataload import KaggleAmazonDataset
+from src.p_neuro import Net, ResNet50, ResNet101, ResNet152, DenseNet121
 from src.p_training import train, snapshot
+#from src.p2_validation import validate
 from src.p_validation import validate
 from src.p_model_selection import train_valid_split
 from src.p_logger import setup_logs
+#from src.p2_prediction import predict, output
 from src.p_prediction import predict, output
 from src.p_data_augmentation import ColorJitter
 # from src.p_metrics import SmoothF2Loss
+from src.p2_loss import ConvolutedLoss
 from src.p_sampler import SubsetSampler, balance_weights
 
 ## Utilities
@@ -33,32 +36,42 @@ from torch.utils.data.sampler import WeightedRandomSampler, SubsetRandomSampler
 ############################################################################
 #######  CONTROL CENTER ############# STAR COMMAND #########################
 ## Variables setup
-# model = ResNet50(17).cuda()
-# model = Net().cuda()
-# model = ResNet101(17).cuda()
-model = DenseNet121(17).cuda() # Note: Until May 5 19:12 CEST DenseNet121 was actually ResNet50 :/
+model = ResNet50(17).cuda()
+# model = ResNet152(17).cuda()
 
 epochs = 30
-batch_size = 16
+batch_size = 32
 
 # Run name
-run_name = time.strftime("%Y-%m-%d_%H%M-") + "true-densenet121"
+run_name = time.strftime("%Y-%m-%d_%H%M-") + "weightedloss"
 
-## Normalization on dataset mean/std
-# normalize = transforms.Normalize(mean=[0.30249774, 0.34421161, 0.31507745],
-#                                  std=[0.13718569, 0.14363895, 0.16695958])
-    
 ## Normalization on ImageNet mean/std for finetuning
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
 # Note, p_training has lr_decay automated
-# optimizer = optim.Adam(model.parameters(), lr=0.1) # From scratch # Don't use Weight Decay with PReLU
-# optimizer = optim.SGD(model.parameters(), lr=1e-1, momentum=0.9, weight_decay=1e-4)  # From scratch
 optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9) # Finetuning whole model
 
-criterion = torch.nn.BCELoss()
-# criterion = SmoothF2Loss() # Using F2 directly as a cost function does 0.88 as a final cross validation. This is probably explained because cross-enropy is very efficient for sigmoid outputs (turning it into a convex problem). So keep Sigmoid + Cross entropy or something else + SmoothF2
+# criterion = ConvolutedLoss()
+criterion = torch.nn.MultiLabelSoftMarginLoss(
+    weight = torch.from_numpy(
+                 1/np.array([1,  2,  1,  1,
+                             1,  3,  2,  3,
+                             4,  4,  1,  1,
+                             1,  1,  3,  4,  1])
+    )).float().cuda()
+
+#classes = [
+#    'clear', 'cloudy', 'haze','partly_cloudy',
+#    'agriculture','artisinal_mine','bare_ground','blooming',
+#    'blow_down','conventional_mine','cultivation','habitation',
+#    'primary','road','selective_logging','slash_burn','water'
+#    ]
+## Frequency
+#    [28203,  2330,  2695,  7251,
+#     12338,   339,   859,   332,
+#        98,   100,  4477,  3662,
+#     37840,  8076,   340,   209,  7262]
 
 save_dir = './snapshots'
 
@@ -88,12 +101,12 @@ if __name__ == "__main__":
                      transforms.ToTensor(),
                      ColorJitter(),
                      normalize,
-                     Affine(
-                         rotation_range = 15,
-                         translation_range = (0.2,0.2),
-                         shear_range = math.pi/6,
-                         #zoom_range=(0.7,1.4)
-                     )
+                     # Affine(
+                     #    rotation_range = 15,
+                     #    translation_range = (0.2,0.2),
+                     #    shear_range = math.pi/6,
+                     #    zoom_range=(0.7,1.4)
+                     #)
     ])
     
     ## Normalization only for validation and test
@@ -131,7 +144,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(X_train,
                           batch_size=batch_size,
                           sampler=train_sampler,
-                          num_workers=1,
+                          num_workers=4,
                           pin_memory=True)
     
     valid_loader = DataLoader(X_val,

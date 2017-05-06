@@ -26,8 +26,8 @@ def validate(epoch,valid_loader,model,loss_func,mlb):
         data, target = data.cuda(async=True), target.cuda(async=True)
         data, target = Variable(data, volatile=True), Variable(target, volatile=True)
     
-        pred = F.sigmoid(model(data))
-        predictions.append(pred.data.cpu().numpy())
+        pred = model(data)
+        predictions.append(F.sigmoid(pred).data.cpu().numpy())
         
         total_loss += loss_func(pred,target).data[0]
     

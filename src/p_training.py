@@ -26,7 +26,7 @@ def train(epoch,train_loader,model,loss_func, optimizer):
     
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.cuda(async=True), target.cuda(async=True)
-        data, target = Variable(data), Variable(target)
+        data, target = Variable(data), Variable(target, requires_grad=False)
         optimizer.zero_grad()
         output = model(data)
         loss = loss_func(output,target)
