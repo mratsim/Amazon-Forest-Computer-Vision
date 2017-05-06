@@ -5,6 +5,8 @@
 
 import torch
 import random
+import PIL.ImageEnhance as ie
+import PIL.Image as im
 
 
 class Lighting(object):
@@ -98,3 +100,101 @@ class ColorJitter(RandomOrder):
             self.transforms.append(Contrast(contrast))
         if saturation != 0:
             self.transforms.append(Saturation(saturation))
+
+class RandomFlip(object):
+    """Randomly flips the given PIL.Image with a probability of 0.25 horizontal,
+                                                                0.25 vertical,
+                                                                0.5 as is
+    """
+    
+    def __call__(self, img):
+        dispatcher = {
+            0: img,
+            1: img,
+            2: img.transpose(im.FLIP_LEFT_RIGHT),
+            3: img.transpose(im.FLIP_TOP_BOTTOM)
+        }
+    
+        return dispatcher[random.randint(0,3)] #randint is inclusive
+
+class RandomRotate(object):
+    """Randomly rotate the given PIL.Image with a probability of 1/6 90°,
+                                                                 1/6 180°,
+                                                                 1/6 270°,
+                                                                 1/2 as is
+    """
+    
+    def __call__(self, img):
+        dispatcher = {
+            0: img,
+            1: img,
+            2: img,            
+            3: img.transpose(im.ROTATE_90),
+            4: img.transpose(im.ROTATE_180),
+            5: img.transpose(im.ROTATE_270)
+        }
+    
+        return dispatcher[random.randint(0,5)] #randint is inclusive
+    
+class PILColorBalance(object):
+
+    def __init__(self, var):
+        self.var = var
+
+    def __call__(self, img):
+        alpha = random.uniform(1 - self.var, 1 + self.var)
+        return ie.Color(img).enhance(alpha)
+
+class PILContrast(object):
+
+    def __init__(self, var):
+        self.var = var
+
+    def __call__(self, img):
+        alpha = random.uniform(1 - self.var, 1 + self.var)
+        return ie.Contrast(img).enhance(alpha)
+
+
+class PILBrightness(object):
+
+    def __init__(self, var):
+        self.var = var
+
+    def __call__(self, img):
+        alpha = random.uniform(1 - self.var, 1 + self.var)
+        return ie.Brightness(img).enhance(alpha)
+
+class PILSharpness(object):
+
+    def __init__(self, var):
+        self.var = var
+
+    def __call__(self, img):
+        alpha = random.uniform(1 - self.var, 1 + self.var)
+        return ie.Sharpness(img).enhance(alpha)
+    
+
+# Check ImageEnhancer effect: https://www.youtube.com/watch?v=_7iDTpTop04
+# Not documented but all enhancements can go beyond 1.0 to 2
+# Image must be RGB
+# Use Pillow-SIMD because Pillow is too slow
+class PowerPIL(RandomOrder):
+    def __init__(self, rotate=True,
+                       flip=True,
+                       colorbalance=0.4,
+                       contrast=0.4,
+                       brightness=0.4,
+                       sharpness=0.4):
+        self.transforms = []
+        if rotate:
+            self.transforms.append(RandomRotate())
+        if flip:
+            self.transforms.append(RandomFlip())
+        if brightness != 0:
+            self.transforms.append(PILBrightness(brightness))
+        if contrast != 0:
+            self.transforms.append(PILContrast(contrast))
+        if colorbalance != 0:
+            self.transforms.append(PILColorBalance(colorbalance))
+        if sharpness != 0:
+            self.transforms.append(PILSharpness(sharpness))

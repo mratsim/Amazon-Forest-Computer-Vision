@@ -8,7 +8,7 @@ from src.p_model_selection import train_valid_split
 from src.p_logger import setup_logs
 #from src.p2_prediction import predict, output
 from src.p_prediction import predict, output
-from src.p_data_augmentation import ColorJitter
+from src.p_data_augmentation import ColorJitter, PowerPIL
 # from src.p_metrics import SmoothF2Loss
 from src.p2_loss import ConvolutedLoss
 from src.p_sampler import SubsetSampler, balance_weights
@@ -43,7 +43,7 @@ epochs = 30
 batch_size = 32
 
 # Run name
-run_name = time.strftime("%Y-%m-%d_%H%M-") + "weightedloss"
+run_name = time.strftime("%Y-%m-%d_%H%M-") + "cloud-habitation-PowerPIL"
 
 ## Normalization on ImageNet mean/std for finetuning
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -55,9 +55,9 @@ optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9) # Finetuning wh
 # criterion = ConvolutedLoss()
 criterion = torch.nn.MultiLabelSoftMarginLoss(
     weight = torch.from_numpy(
-                 1/np.array([1,  2,  1,  1,
+                 1/np.array([1,  3,  2,  1,
                              1,  3,  2,  3,
-                             4,  4,  1,  1,
+                             4,  4,  1,  2,
                              1,  1,  3,  4,  1])
     )).float().cuda()
 
@@ -97,9 +97,9 @@ if __name__ == "__main__":
     ## Augmentation + Normalization for full training
     ds_transform_augmented = transforms.Compose([
                      transforms.RandomSizedCrop(224),
-                     transforms.RandomHorizontalFlip(),
+                     PowerPIL(),
                      transforms.ToTensor(),
-                     ColorJitter(),
+                     # ColorJitter(), # Use PowerPIL instead, with PillowSIMD it's much more efficient
                      normalize,
                      # Affine(
                      #    rotation_range = 15,
