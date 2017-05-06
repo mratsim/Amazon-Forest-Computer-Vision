@@ -81,6 +81,10 @@ class ResNet50(nn.Module):
         self.classifier = nn.Sequential(
         nn.Linear(num_feats, num_classes)
         )
+        
+        # Init of last layer
+        for m in self.classifier:
+            kaiming_normal(m.weight)
 
         # Freeze those weights
         # for p in self.features.parameters():
@@ -111,6 +115,10 @@ class ResNet101(nn.Module):
         self.classifier = nn.Sequential(
         nn.Linear(num_feats, num_classes)
         )
+        
+        # Init of last layer
+        for m in self.classifier:
+            kaiming_normal(m.weight)
 
         # Freeze those weights
         # for p in self.features.parameters():
@@ -141,6 +149,10 @@ class ResNet152(nn.Module):
         self.classifier = nn.Sequential(
         nn.Linear(num_feats, num_classes)
         )
+        
+        # Init of last layer
+        for m in self.classifier:
+            kaiming_normal(m.weight)
 
         # Freeze those weights
         # for p in self.features.parameters():

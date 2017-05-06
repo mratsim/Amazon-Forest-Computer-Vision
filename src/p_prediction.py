@@ -26,7 +26,7 @@ def predict(test_loader, model):
     predictions = np.vstack(predictions)
     
     logger.info("===> Raw predictions done. Here is a snippet")
-    print(predictions)
+    logger.info(predictions)
     return predictions
 
 def output(predictions, threshold, X_test, mlb, dir_path, run_name, accuracy):
@@ -44,7 +44,7 @@ def output(predictions, threshold, X_test, mlb, dir_path, run_name, accuracy):
     result['tags'] = result['tags'].apply(lambda tags: " ".join(tags))
     
     logger.info("===> Final predictions done. Here is a snippet")
-    print(result)
+    logger.info(result)
     
     result_path = os.path.join(dir_path, run_name + '-final-pred-'+str(accuracy)+'.csv')
     result.to_csv(result_path, index=False)
