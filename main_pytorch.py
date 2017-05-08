@@ -1,6 +1,7 @@
 ## Custom Imports
 from src.p2_dataload import KaggleAmazonDataset
 from src.p_neuro import Net, ResNet50, ResNet101, ResNet152, DenseNet121
+from src.p3_neuroRNN import GRU_ResNet50, LSTM_ResNet50, Skip_LSTM_RN50
 from src.p_training import train, snapshot
 #from src.p2_validation import validate
 from src.p_validation import validate
@@ -39,12 +40,15 @@ from torch.utils.data.sampler import WeightedRandomSampler, SubsetRandomSampler
 model = ResNet50(17).cuda()
 # model = ResNet152(17).cuda()
 
-epochs = 30
-batch_size = 32
+# model = GRU_ResNet50(17, 128, 2).cuda()
+# model = LSTM_ResNet50(17, 128, 2).cuda()
+# model = Skip_LSTM_RN50(17, 128, 2).cuda()
+
+epochs = 10
+batch_size = 64
 
 # Run name
-run_name = time.strftime("%Y-%m-%d_%H%M-") + "cloud-habitation-PowerPIL"
-
+run_name = time.strftime("%Y-%m-%d_%H%M-") + "resnet-corr-weight"
 ## Normalization on ImageNet mean/std for finetuning
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -54,12 +58,11 @@ optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9) # Finetuning wh
 
 # criterion = ConvolutedLoss()
 criterion = torch.nn.MultiLabelSoftMarginLoss(
-    weight = torch.from_numpy(
-                 1/np.array([1,  3,  2,  1,
-                             1,  3,  2,  3,
+    weight = torch.Tensor([1,  4,  2,  1,
+                             1,  3,  3,  3,
                              4,  4,  1,  2,
                              1,  1,  3,  4,  1])
-    )).float().cuda()
+    ).cuda()
 
 #classes = [
 #    'clear', 'cloudy', 'haze','partly_cloudy',
