@@ -5,6 +5,7 @@ core
 *.tif
 *.h5
 *.npy
+*.zip
 EDA/
 kernels/
 pretrained-models/
