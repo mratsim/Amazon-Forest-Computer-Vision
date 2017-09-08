@@ -71,7 +71,7 @@ if __name__ == "__main__":
     
 
     
-    X_test = KaggleAmazonDataset('./data/sample_submission.csv','./data/test-jpg/','.jpg',
+    X_test = KaggleAmazonDataset('./data/sample_submission_v2.csv','./data/test-jpg/','.jpg',
                                   ds_transform_raw
                                  )
     test_loader = DataLoader(X_test,

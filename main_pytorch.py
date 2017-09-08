@@ -44,17 +44,17 @@ model = ResNet50(17).cuda()
 # model = LSTM_ResNet50(17, 128, 2).cuda()
 # model = Skip_LSTM_RN50(17, 128, 2).cuda()
 
-epochs = 10
+epochs = 16
 batch_size = 64
 
 # Run name
-run_name = time.strftime("%Y-%m-%d_%H%M-") + "resnet-corr-weight"
+run_name = time.strftime("%Y-%m-%d_%H%M-") + "resnet50-L2reg-new-data"
 ## Normalization on ImageNet mean/std for finetuning
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
 # Note, p_training has lr_decay automated
-optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9) # Finetuning whole model
+optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9, weight_decay=0.0005) # Finetuning whole model
 
 # criterion = ConvolutedLoss()
 criterion = torch.nn.MultiLabelSoftMarginLoss(
@@ -121,10 +121,10 @@ if __name__ == "__main__":
     
     ####     #########     ########     ###########     #####
     
-    X_train = KaggleAmazonDataset('./data/train.csv','./data/train-jpg/','.jpg',
+    X_train = KaggleAmazonDataset('./data/train_v2.csv','./data/train-jpg/','.jpg',
                                  ds_transform_augmented
                                  )
-    X_val = KaggleAmazonDataset('./data/train.csv','./data/train-jpg/','.jpg',
+    X_val = KaggleAmazonDataset('./data/train_v2.csv','./data/train-jpg/','.jpg',
                                  ds_transform_raw
                                  )
     
@@ -182,7 +182,7 @@ if __name__ == "__main__":
         
     ###########################################################
     ## Prediction
-    X_test = KaggleAmazonDataset('./data/sample_submission.csv','./data/test-jpg/','.jpg',
+    X_test = KaggleAmazonDataset('./data/sample_submission_v2.csv','./data/test-jpg/','.jpg',
                                   ds_transform_raw
                                  )
     test_loader = DataLoader(X_test,

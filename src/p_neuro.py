@@ -1,5 +1,4 @@
 from torch import nn, ones
-from torch.autograd import Variable
 from torchvision import models
 from torch.nn.init import kaiming_normal
 from torch import np
