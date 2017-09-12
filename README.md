@@ -2,6 +2,8 @@
 Satellite Image tagging code using PyTorch / Keras
 
 You will find:
+  - [A script that output the mean and stddev of your image if you want to train from scratch](https://github.com/mratsim/Amazon_Forest_Computer_Vision/blob/master/compute-mean-std.py#L28)
+
   - [Using weighted loss function](https://github.com/mratsim/Amazon_Forest_Computer_Vision/blob/master/main_pytorch.py#L61)
 
   - [Logging your experiment](https://github.com/mratsim/Amazon_Forest_Computer_Vision/blob/master/main_pytorch.py#L89)
