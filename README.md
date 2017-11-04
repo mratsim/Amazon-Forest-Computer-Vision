@@ -1,4 +1,4 @@
-# Amazon_Forest_Computer_Vision
+# Amazon Forest Computer Vision
 Satellite Image tagging code using PyTorch / Keras
 
 You will find:
