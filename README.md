@@ -1,6 +1,10 @@
 # Amazon Forest Computer Vision
 Satellite Image tagging code using PyTorch / Keras
 
+Here is a sample of images we had to work with
+
+![](chips.jpg)
+
 You will find:
   - [A script that output the mean and stddev of your image if you want to train from scratch](https://github.com/mratsim/Amazon_Forest_Computer_Vision/blob/master/compute-mean-std.py#L28)
 
