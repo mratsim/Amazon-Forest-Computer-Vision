@@ -3,7 +3,19 @@ Satellite Image tagging code using PyTorch / Keras
 
 Here is a sample of images we had to work with
 
-![](chips.jpg)
+![](media/chipdesc.jpg)
+![](media/chips.jpg)
+![](media/agg1.jpg)
+![](media/cloudy_1.jpg)
+![](media/habitation1.jpg)
+![](media/haze1.jpg)
+![](media/pc1.jpg)
+![](media/river.jpg)
+![](media/road.jpg)
+
+_Source: https://www.kaggle.com/c/planet-understanding-the-amazon-from-space/data_
+
+> Note: the repo was developed in May 2017 on PyTorch 0.1. PyTorch was publicly announced in January 2017 and has seen tremendous changes since then.
 
 You will find:
   - [A script that output the mean and stddev of your image if you want to train from scratch](https://github.com/mratsim/Amazon_Forest_Computer_Vision/blob/master/compute-mean-std.py#L28)

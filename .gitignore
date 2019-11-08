@@ -1,11 +1,6 @@
+data/
+out/
 core
-*.csv
-*.7z
-*.jpg
-*.tif
-*.h5
-*.npy
-*.zip
 EDA/
 kernels/
 pretrained-models/
